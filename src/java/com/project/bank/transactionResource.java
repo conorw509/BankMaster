@@ -89,9 +89,9 @@ public class transactionResource {
         ResultSet rs = st.executeQuery("SELECT * FROM transactions1");
 
         while (rs.next()) {
-            transaction ts = new transaction();
+            transaction ts = new transaction(); 
             ts.setTrans_Type(rs.getString("trans_type"));
-            ts.setDate(rs.getDate("date_Ob"));
+          
               ts.setAccountId(rs.getInt("account_Id"));
                ts.setAmount(rs.getInt("amount"));
                ts.setBalance(rs.getString("balance"));
@@ -236,24 +236,51 @@ public class transactionResource {
         Class.forName("org.apache.derby.jdbc.ClientDriver");
         conn = DriverManager.getConnection(url, userN, pWord);
         Gson gson = new Gson();
+            //getting accounr Id id from account table
+                String findCusId = ("SELECT (account_number) FROM account WHERE account_number =?");
+
+                PreparedStatement st = conn.prepareStatement(findCusId);
+                st.setInt(1, id);
+                ResultSet rs2 = st.executeQuery();
+
+                int getAccId = 0;
+                if (rs2.next()) {
+                    //assign got account id from account table to variable
+                    getAccId = rs2.getInt(1);
+                }
+
+                System.out.println("got accout id:" +getAccId);
+               
+                //if the id being passed is isnt the same as the one in account table or is null invalid
+                if (getAccId != id || id == 0) {
+
+                    return Response.status(200).entity(gson.toJson("Failed Account ID is invalid")).build();
+
+                }
 
         String er = "Error The account has been removed,doesnt exist or you have not made a transaction";
-        String verifyAPI = "SELECT balance FROM transactions1 WHERE account_id = ?";
-        PreparedStatement st = conn.prepareStatement(verifyAPI);
-        st.setInt(1, id);
-        ResultSet rs = st.executeQuery();
-        List events = new ArrayList<>();
-        if (rs.next()) {
-            transaction acc = new transaction();
-            acc.setBalance(rs.getString("balance"));
-            events.add(acc);
-            conn.close();
-            return Response.status(200).entity(gson.toJson(events)).build();
+   
+           String getBal = ("SELECT max(balance) from transactions1");
+                  Statement sto = conn.createStatement();
 
-        } else {
+             
+                ResultSet rs3 = sto.executeQuery(getBal);
+
+                Double gotTheBal =0.0;
+                  
+                
+                if (rs3.next()) {
+                    //assign got balance to variable
+                    gotTheBal = rs3.getDouble(1);
+                
+            return Response.status(200).entity(gson.toJson(gotTheBal)).build();
+                }    
+     
+      else {
             return Response.status(200).entity(gson.toJson(er)).build();
         }
     }
+
     
     
     

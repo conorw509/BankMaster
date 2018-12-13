@@ -80,6 +80,7 @@ public class customerResource {
         ResultSet rs = st.executeQuery("SELECT customers.name, customers.address, customers.email,customers.password FROM customers INNER JOIN account ON customers.customer_id = account.customer_id");
 
         while (rs.next()) {
+            
             customer ts = new customer();
             ts.setName(rs.getString("name"));
             ts.setAddress(rs.getString("address"));
